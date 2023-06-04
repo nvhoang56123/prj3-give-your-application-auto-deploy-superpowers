@@ -119,17 +119,20 @@ jobs:
     steps:
       # Checkout code from git
       # Restore from cache
+      - checkout
       # Your job code here
       - run:
           name: scan-frontend
           command: |
             # Your code here
-            pwd
-            ls
+            cd frontend
+            npm install
+            npm audit fix --force
   deploy-infrastructure:
     executor: aws-cli/default
     steps:
       # Checkout code from git
+      - checkout
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -165,6 +168,7 @@ jobs:
       tag: "3.11.2"
     steps:
       # Checkout code from git
+      - checkout
       # Add ssh keys with fingerprint
       # attach workspace
       - run:
@@ -183,6 +187,7 @@ jobs:
     docker:
       - image: circleci/node:13.8.0
     steps:
+      - checkout
       # Checkout code from git
       - run:
           name: Run migrations
@@ -202,6 +207,7 @@ jobs:
       tag: "3.11.2"
     steps:
       # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
@@ -224,6 +230,7 @@ jobs:
       tag: "3.11.2"
     steps:
       # Checkout code from git
+      - checkout
       # Add ssh keys with fingerprint
       # attach workspace
       - run:
@@ -240,6 +247,7 @@ jobs:
     executor: aws-cli/default
     steps:
       # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
@@ -263,6 +271,7 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
@@ -286,6 +295,7 @@ jobs:
     executor: aws-cli/default
     steps:
       # Checkout code from git
+      - checkout
       - run:
           name: Get old stack workflow id
           command: |
