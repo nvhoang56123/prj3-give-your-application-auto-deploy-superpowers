@@ -64,6 +64,7 @@ jobs:
           command: |
             cd frontend
             npm install
+            npm run build
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
@@ -77,9 +78,8 @@ jobs:
       - run:
           name: Test-frontend
           command: |
-            # Your code here
-            pwd
-            ls             
+            cd frontend
+            echo "Temporary no test"    
   test-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -91,8 +91,8 @@ jobs:
           name: test-backend
           command: |
             # Your code here
-            pwd
-            ls        
+            cd backend
+            npm run tests
   scan-frontend:
     docker:
       - image: circleci/node:13.8.0
