@@ -111,6 +111,7 @@ jobs:
           command: |
             # Your code here
             cd frontend
+            npm install
             npm audit
   scan-backend:
     docker:
