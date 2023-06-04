@@ -112,7 +112,7 @@ jobs:
             # Your code here
             cd frontend
             npm install
-            npm audit
+            npm audit fix --force
   scan-backend:
     docker:
       - image: circleci/node:13.8.0
