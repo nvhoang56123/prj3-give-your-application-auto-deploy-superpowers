@@ -141,14 +141,12 @@ jobs:
       # Checkout code from git
       - checkout
       - aws-cli/setup:
-          aws-access-key-id: PARAM_AWS_CLI_ACCESS_KEY_ID
-          aws-secret-access-key: PARAM_AWS_CLI_SECRET_ACCESS_KEY
-          aws-region: PARAM_AWS_CLI_REGION
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_ACCESS_SECRET
+          aws-region: AWS_REGION_NAME
       - run:
           name: Ensure back-end infrastructure exists
           command: |
-            echo $PARAM_AWS_CLI_REGION
-            aws s3 ls
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
               --tags project=prj3-hnguyen3 \
@@ -157,8 +155,6 @@ jobs:
       - run:
           name: Ensure front-end infrastructure exist
           command: |
-            echo $PARAM_AWS_CLI_ACCESS_KEY_ID
-            echo $PARAM_AWS_CLI_SECRET_ACCESS_KEY
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --tags project=yprj3-hnguyen3 \
