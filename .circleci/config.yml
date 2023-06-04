@@ -90,7 +90,7 @@ jobs:
     steps: null
   deploy-infrastructure:
     docker:
-      - image: circleci/node:13.8.0 that supports AWS CLI
+      - image: circleci/node:13.8.0
     steps:
       - run:
           name: Ensure back-end infrastructure exists
@@ -121,7 +121,7 @@ jobs:
             - project/.circleci/ansible/inventory.txt
   configure-infrastructure:
     docker:
-      - image: circleci/node:13.8.0 that supports Ansible
+      - image: circleci/node:13.8.0
     steps:
       - run:
           name: Install dependencies
@@ -135,7 +135,7 @@ jobs:
             exit 1
   run-migrations:
     docker:
-      - image: circleci/node:13.8.0 that supports NodeJS
+      - image: circleci/node:13.8.0
     steps:
       - run:
           name: Run migrations
@@ -149,7 +149,7 @@ jobs:
             exit 1
   deploy-frontend:
     docker:
-      - image: circleci/node:13.8.0 that supports AWS CLI
+      - image: circleci/node:13.8.0
     steps:
       - run:
           name: Install dependencies
@@ -167,7 +167,7 @@ jobs:
             # your code here
   deploy-backend:
     docker:
-      - image: circleci/node:13.8.0 that supports Ansible
+      - image: circleci/node:13.8.0
     steps:
       - run:
           name: Install dependencies
@@ -198,7 +198,7 @@ jobs:
             # your code here
   cloudfront-update:
     docker:
-      - image: circleci/node:13.8.0 that supports AWS CLI
+      - image: circleci/node:13.8.0
     steps:
       - run:
           name: Install dependencies
