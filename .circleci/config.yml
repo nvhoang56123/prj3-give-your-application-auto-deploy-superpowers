@@ -94,7 +94,7 @@ jobs:
       # Your job code here
   deploy-infrastructure:
     docker:
-      - image: circleci/node:13.8.0 that supports AWS CLI
+      - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
       - run:
@@ -128,7 +128,7 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: circleci/node:13.8.0 that supports Ansible
+      - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
       # Add ssh keys with fingerprint
@@ -146,7 +146,7 @@ jobs:
       # Here's where you will add some code to rollback on failure      
   run-migrations:
     docker:
-      - image: circleci/node:13.8.0 that supports NodeJS
+      - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
       - run:
@@ -162,7 +162,7 @@ jobs:
      # Here's where you will add some code to rollback on failure      
   deploy-frontend:
     docker:
-      - image: circleci/node:13.8.0 that supports AWS CLI
+      - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
       - run:
@@ -182,7 +182,7 @@ jobs:
       # Here's where you will add some code to rollback on failure      
   deploy-backend:
     docker:
-      - image: circleci/node:13.8.0 that supports Ansible
+      - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
       # Add ssh keys with fingerprint
@@ -220,7 +220,7 @@ jobs:
       # Here's where you will add some code to rollback on failure  
   cloudfront-update:
     docker:
-      - image: circleci/node:13.8.0 that supports AWS CLI
+      - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
       - run:
