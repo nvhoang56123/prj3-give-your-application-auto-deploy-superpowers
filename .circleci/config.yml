@@ -137,9 +137,11 @@ jobs:
             npm audit fix --force
   deploy-infrastructure:
     executor: aws-cli/default
+    environment:
+        PARAM_AWS_CLI_ACCESS_KEY_ID: "AKIA5EKMINFGZES6FYMQ"
+        PARAM_AWS_CLI_SECRET_ACCESS_KEY: "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"
     steps:
       # Checkout code from git
-      - export-environment-variables
       - checkout
       - aws-cli/setup
       - run:
