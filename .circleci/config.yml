@@ -140,7 +140,7 @@ jobs:
     steps:
       # Checkout code from git
       - checkout
-      - aws-cli/setup
+      - aws-cli/setup:
         environment:
             PARAM_AWS_CLI_ACCESS_KEY_ID: "AKIA5EKMINFGZES6FYMQ"
             PARAM_AWS_CLI_SECRET_ACCESS_KEY: "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"
