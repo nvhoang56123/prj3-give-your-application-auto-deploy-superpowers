@@ -12,7 +12,6 @@ commands:
           command: |
             # Your code here
             # exit 1
-
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
@@ -50,7 +49,6 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
-
   build-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -66,15 +64,13 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
-
   test-frontend:
     docker:
       - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
       # Restore from cache
-      # Your job code here
-                
+      # Your job code here              
   test-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -82,7 +78,6 @@ jobs:
       # Checkout code from git
       # Restore from cache
       # Your job code here
-            
   scan-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -90,7 +85,6 @@ jobs:
       # Checkout code from git
       # Restore from cache
       # Your job code here
-
   scan-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -98,7 +92,6 @@ jobs:
       # Checkout code from git
       # Restore from cache
       # Your job code here
-
   deploy-infrastructure:
     docker:
       - image: circleci/node:13.8.0 that supports AWS CLI
@@ -151,7 +144,6 @@ jobs:
             # Your code here
             exit 1
       # Here's where you will add some code to rollback on failure      
-
   run-migrations:
     docker:
       - image: circleci/node:13.8.0 that supports NodeJS
@@ -168,7 +160,6 @@ jobs:
             # Your code here
             exit 1
      # Here's where you will add some code to rollback on failure      
-
   deploy-frontend:
     docker:
       - image: circleci/node:13.8.0 that supports AWS CLI
@@ -189,7 +180,6 @@ jobs:
           command: |
             # your code here
       # Here's where you will add some code to rollback on failure      
-                    
   deploy-backend:
     docker:
       - image: circleci/node:13.8.0 that supports Ansible
@@ -206,7 +196,6 @@ jobs:
           command: |
             # your code here
       # Here's where you will add some code to rollback on failure  
-
   smoke-test:
     docker:
       # Lightweight Docker image 
@@ -229,7 +218,6 @@ jobs:
           command: |
             # your code here
       # Here's where you will add some code to rollback on failure  
-
   cloudfront-update:
     docker:
       - image: circleci/node:13.8.0 that supports AWS CLI
@@ -244,7 +232,6 @@ jobs:
           command: |
             # your code here
       # Here's where you will add some code to rollback on failure  
-
 cleanup:
     docker:
       - image: circleci/node:13.8.0
@@ -263,7 +250,6 @@ cleanup:
             then
               # your code here
             fi
-            
 
 workflows:
   default:
@@ -282,7 +268,7 @@ workflows:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
             branches:
-              only: [test-feature-branch]
+            only: [test-feature-branch]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
       - run-migrations:
