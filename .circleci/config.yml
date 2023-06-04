@@ -157,13 +157,7 @@ jobs:
               --parameter-overrides ID="prj3-hnguyen3"                
       - run:
           name: Ensure front-end infrastructure exist
-          environment:
-            PARAM_AWS_CLI_ACCESS_KEY_ID: "AKIA5EKMINFGZES6FYMQ"
-            PARAM_AWS_CLI_SECRET_ACCESS_KEY: "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"
-          name: Ensure back-end infrastructure exists
           command: |
-            echo $AWS_SECRET_ACCESS_KEY
-            echo $AWS_ACCESS_KEY_ID
             aws cloudformation deploy \
               --region us-east-1 \
               --template-file .circleci/files/frontend.yml \
