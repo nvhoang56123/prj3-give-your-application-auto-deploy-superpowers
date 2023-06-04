@@ -277,8 +277,7 @@ jobs:
             ls
 
 cleanup:
-    docker:
-      # Docker image here
+    executor: aws-cli/default
     steps:
       # Checkout code from git
       - run:
