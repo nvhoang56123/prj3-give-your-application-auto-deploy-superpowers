@@ -149,7 +149,6 @@ jobs:
           command: |
             aws s3 ls
             aws cloudformation deploy \
-              --region us-east-1 \
               --template-file .circleci/files/backend.yml \
               --tags project=prj3-hnguyen3 \
               --stack-name "prj3-hnguyen3-back-end" \
@@ -160,7 +159,6 @@ jobs:
             echo $PARAM_AWS_CLI_ACCESS_KEY_ID
             echo $PARAM_AWS_CLI_SECRET_ACCESS_KEY
             aws cloudformation deploy \
-              --region us-east-1 \
               --template-file .circleci/files/frontend.yml \
               --tags project=yprj3-hnguyen3 \
               --stack-name "prj3-hnguyen3-front-end" \
