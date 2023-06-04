@@ -43,11 +43,6 @@ revert-migrations:
             fi
 
 jobs:
-  no-running:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
   build-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -330,9 +325,13 @@ workflows:
   default:
     jobs:
       - build-frontend
-        requires: [no-running]
+        filters:
+            branches:
+              only: [master]
       - build-backend
-        requires: [no-running]
+        filters:
+            branches:
+              only: [master]
       - test-frontend:
           requires: [build-frontend]
       - test-backend:
