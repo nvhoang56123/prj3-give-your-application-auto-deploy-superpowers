@@ -254,13 +254,22 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            # your code here
+            # Your code here
+            pwd
+            ls
       - run:
           name: Update cloudfront distribution
           command: |
-            # your code here
+            # Your code here
+            pwd
+            ls
       # Here's where you will add some code to rollback on failure  
-
+      - run:
+          name: scan-frontend
+          command: |
+            # Your code here
+            pwd
+            ls
 cleanup:
     docker:
       # Docker image here
