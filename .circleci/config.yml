@@ -92,7 +92,7 @@ jobs:
           command: |
             # Your code here
             cd backend
-            npm run tests
+            npm run test
   scan-frontend:
     docker:
       - image: circleci/node:13.8.0
