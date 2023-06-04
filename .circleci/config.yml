@@ -186,8 +186,9 @@ jobs:
      # Here's where you will add some code to rollback on failure      
 
   deploy-frontend:
-    docker:
-      # Docker image here that supports AWS CLI
+    executor: 
+      name: python/default
+      tag: "3.11.2"
     steps:
       # Checkout code from git
       - run:
@@ -207,8 +208,9 @@ jobs:
       # Here's where you will add some code to rollback on failure      
                     
   deploy-backend:
-    docker:
-      # Docker image here that supports Ansible
+    executor: 
+      name: python/default
+      tag: "3.11.2"
     steps:
       # Checkout code from git
       # Add ssh keys with fingerprint
