@@ -147,8 +147,7 @@ jobs:
       - run:
           name: Ensure back-end infrastructure exists
           command: |
-            echo $PARAM_AWS_CLI_ACCESS_KEY_ID
-            echo $PARAM_AWS_CLI_SECRET_ACCESS_KEY
+            aws s3 ls
             aws cloudformation deploy \
               --region us-east-1 \
               --template-file .circleci/files/backend.yml \
