@@ -137,14 +137,14 @@ jobs:
             npm audit fix --force
   deploy-infrastructure:
     executor: aws-cli/default
-    environment:
-        PARAM_AWS_CLI_ACCESS_KEY_ID: "AKIA5EKMINFGZES6FYMQ"
-        PARAM_AWS_CLI_SECRET_ACCESS_KEY: "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"
     steps:
       # Checkout code from git
       - checkout
       - aws-cli/setup
       - run:
+          environment:
+            PARAM_AWS_CLI_ACCESS_KEY_ID: "AKIA5EKMINFGZES6FYMQ"
+            PARAM_AWS_CLI_SECRET_ACCESS_KEY: "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"
           name: Ensure back-end infrastructure exists
           command: |
             aws cloudformation deploy \
@@ -327,13 +327,11 @@ workflows:
       - build-frontend:
           filters:
             branches:
-              only:
-                - master
+              only: [master]
       - build-backend:
           filters:
             branches:
-              only:
-                - master
+              only: [master]
       - test-frontend:
           requires: [build-frontend]
       - test-backend:
