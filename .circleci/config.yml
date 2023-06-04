@@ -227,7 +227,7 @@ jobs:
 
   smoke-test:
     docker:
-      # Lightweight Docker image 
+      executor: aws-cli/default
     steps:
       # Checkout code from git
       - run:
