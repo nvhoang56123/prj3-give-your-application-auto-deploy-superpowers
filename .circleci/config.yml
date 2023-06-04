@@ -275,8 +275,7 @@ jobs:
             # Your code here
             pwd
             ls
-
-cleanup:
+  cleanup:
     executor: aws-cli/default
     steps:
       # Checkout code from git
