@@ -43,6 +43,11 @@ revert-migrations:
             fi
 
 jobs:
+  no-running:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
   build-backend:
     docker:
       - image: circleci/node:13.8.0
