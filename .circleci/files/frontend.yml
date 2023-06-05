@@ -15,6 +15,9 @@ Resources:
       OwnershipControls:  # << Add
         Rules:
           - ObjectOwnership: ObjectWriter
+      PublicAccessBlockConfiguration:
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: 404.html
