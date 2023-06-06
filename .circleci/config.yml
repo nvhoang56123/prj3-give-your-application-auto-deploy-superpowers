@@ -5,13 +5,6 @@ orbs:
   python: circleci/python@2.1.1
 
 commands:
-  export-environment-variables:
-    steps:
-      - run:
-          name: "Export environment variable"
-          command: |
-            echo 'export PARAM_AWS_CLI_ACCESS_KEY_ID="AKIA5EKMINFGZES6FYMQ"' >> "$BASH_ENV"
-            echo 'export PARAM_AWS_CLI_SECRET_ACCESS_KEY="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"' >> "$BASH_ENV"
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
