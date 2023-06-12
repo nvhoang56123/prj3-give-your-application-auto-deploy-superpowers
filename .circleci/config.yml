@@ -337,11 +337,11 @@ workflows:
   default:
     jobs:
       - build-frontend
-        filters:
+          filters:
             branches:
               only: [master]
       - build-backend
-        filters:
+          filters:
             branches:
               only: [master]
       - test-frontend:
