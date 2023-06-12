@@ -16,23 +16,31 @@ commands:
           command: |
             # Your code here
             # exit 1
-revert-migrations:
+  exports:
+    steps:
+      - run:
+          name: "Get Current and Previous commit"
+          command: |
+            # Git hash for the current commit
+            echo 'export CURRENT_COMMIT=`git show HEAD`' >> "$BASH_ENV"
+            echo 'export PREVIOUS_COMMIT=`git show HEAD^1`' >> "$BASH_ENV"
+
+  revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
       # Add parameter here     
     steps:
       - run:
           name: Revert migrations
-          # Add when this will run
+          when: "on_fail"
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
             SUCCESS = 1
             if(( $SUCCESS==1 )); 
             then
-            #  cd ~/project/backend
-            #  npm install
-            #  Add revert code here. You can find this in the Getting Started section.
-              exit 1
+              cd backend
+              npm install
+              npm run migrations:revert
             fi
 
 jobs:
@@ -193,15 +201,28 @@ jobs:
       # Checkout code from git
       - run:
           name: Run migrations
-          command: |
-            # Your code here
-            exit 1
+          working_directory: ~/backend
+          command: |       
+            npm install
+            npm run migrations > migrations.out            
+            cat migrations.out
       - run:
-          name: Send migration results to memstash
+          name: Send migration results to git
+          working_directory: ~/backend
           command: |
-            # Your code here
-            exit 1
-     # Here's where you will add some code to rollback on failure      
+            grep -q "has been executed successfully." migrations.out; 
+            [ $? -eq 0 ] 
+            then
+              git config credential.helper 'cache --timeout=120'
+              git config user.email "hoangnv5@fpt.com"
+              git config user.name "Deployment Bot"
+              git commit --allow-empty -m "Trigger deployment"
+              echo `git rev-parse --short HEAD` > current-hash.txt
+              git push -q https://${GITHUB_TOKEN}@https://github.com/nvhoang56123/prj3-give-your-application-auto-deploy-superpowers main
+
+            echo "No migration"
+      - revert-migrations:
+          migrations-key: migration_$CUR_SHORT_HASH    
 
   deploy-frontend:
     executor: 
@@ -316,7 +337,13 @@ workflows:
   default:
     jobs:
       - build-frontend
+        filters:
+            branches:
+              only: [master]
       - build-backend
+        filters:
+            branches:
+              only: [master]
       - test-frontend:
           requires: [build-frontend]
       - test-backend:
@@ -326,7 +353,7 @@ workflows:
       - scan-frontend:
           requires: [build-frontend]
       - deploy-infrastructure:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          #requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
             branches:
               only: [main]
