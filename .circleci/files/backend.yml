@@ -35,3 +35,6 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${ID}-backend
+      Export:
+            Name:
+                Fn::Sub: "${ID}-backend"    
