@@ -167,6 +167,18 @@ jobs:
               --stack-name "prj3-hnguyen3-back-end-$CURRENT_COMMIT_SHORT" \
               --parameter-overrides ID="prj3-hnguyen3" COMMITID="$CURRENT_COMMIT_SHORT"
       - run:
+          name: "Get backend host"
+          command: |
+            touch backendhost
+            host=$(aws cloudformation list-exports \
+            --query "Exports[?Name==\`prj3-hnguyen3-backend-$CURRENT_COMMIT_SHORT-public-dns\`].Value" \
+            --no-paginate --output text)
+            echo $host >> $(eval echo ".circleci/ansible/inventory.txt")            
+            cp $(eval echo ".circleci/ansible/inventory.txt inventory.txt")            
+            API_URL="http://${host}:3030"
+            echo "${API_URL}"
+            echo $API_URL > backendhost
+      - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
@@ -174,6 +186,17 @@ jobs:
               --tags project=yprj3-hnguyen3 \
               --stack-name "prj3-hnguyen3-front-end-$CURRENT_COMMIT_SHORT" \
               --parameter-overrides ID="prj3-hnguyen3" COMMITID="$CURRENT_COMMIT_SHORT"
+      - run:
+          name: "Get frontend host"
+          command: |
+            touch websiteurl
+            static_export_name=Udapeople-Frontend-$CUR_SHORT_HASH-WebsiteURL
+            host=$(aws cloudformation list-exports \
+            --query "Exports[?Name==\`prj3-hnguyen3-frontend-$CURRENT_COMMIT_SHORT-weburl\`].Value" \
+            --no-paginate --output text)
+            static_host=${host#*//}
+            echo "${static_host}"
+            echo $static_host > websiteurl    
       - run:
           name: Add back-end ip to ansible inventory
           command: |
@@ -184,10 +207,10 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure     
-      #- destroy-environment:
-      #    environment-name: front-end
-      #- destroy-environment:
-      #   environment-name: back-end
+      - destroy-environment:
+          environment-name: front-end
+      - destroy-environment:
+         environment-name: back-end
 
   configure-infrastructure:
     executor:
