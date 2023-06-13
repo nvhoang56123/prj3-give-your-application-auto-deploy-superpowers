@@ -21,7 +21,7 @@ commands:
           when: on_fail
           command: |
              aws cloudformation delete-stack \
-              --stack-name "prj3-hnguyen3-<<parameters.environment-name>>-$CURRENT_COMMIT" \
+              --stack-name "prj3-hnguyen3-<<parameters.environment-name>>-$CURRENT_COMMIT_SHORT" \
   exports:
     steps:
       - run:
@@ -29,7 +29,9 @@ commands:
           command: |
             # Git hash for the current commit
             echo 'export CURRENT_COMMIT=`git show HEAD`' >> "$BASH_ENV"
+            echo 'export CURRENT_COMMIT_SHORT=`git rev-parse --short HEAD`' >> "$BASH_ENV"
             echo 'export PREVIOUS_COMMIT=`git show HEAD^1`' >> "$BASH_ENV"
+            echo 'export PREVIOUS_COMMIT_SHORT=`git rev-parse --short HEAD^1`' >> "$BASH_ENV"
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -162,7 +164,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
               --tags project=prj3-hnguyen3 \
-              --stack-name "prj3-hnguyen3-back-end-$CURRENT_COMMIT" \
+              --stack-name "prj3-hnguyen3-back-end-$CURRENT_COMMIT_SHORT" \
               --parameter-overrides ID="prj3-hnguyen3"                
       - run:
           name: Ensure front-end infrastructure exist
@@ -170,7 +172,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --tags project=yprj3-hnguyen3 \
-              --stack-name "prj3-hnguyen3-front-end-$CURRENT_COMMIT" \
+              --stack-name "prj3-hnguyen3-front-end-$CURRENT_COMMIT_SHORT" \
               --parameter-overrides ID="prj3-hnguyen3"  
       - run:
           name: Add back-end ip to ansible inventory
