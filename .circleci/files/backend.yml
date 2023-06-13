@@ -5,6 +5,9 @@ Parameters:
   ID:
     Description: Unique identifier.
     Type: String
+  COMMIT_ID:
+    Description: Unique identifier for commit.
+    Type: String  
 
 Resources:
   InstanceSecurityGroup:
@@ -43,4 +46,4 @@ Outputs:
             Fn::GetAtt: "EC2Instance.PublicIp"
         Export:
             Name:
-                Fn::Sub: "${ID}-backend-public-dns"
+                Fn::Sub: "${ID}-backend-${COMMIT_ID}-public-dns"
