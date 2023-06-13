@@ -35,6 +35,11 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${ID}-backend
-      Export:
+
+Outputs:
+    EC2Instance:
+        Description: "Output for the created EC2Instance"
+        Value: !Ref EC2Instance
+        Export:
             Name:
-                Fn::Sub: "${ID}-backend"    
+                Fn::Sub: "${ID}-backend"
