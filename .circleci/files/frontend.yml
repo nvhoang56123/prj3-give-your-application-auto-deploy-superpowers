@@ -5,7 +5,7 @@ Parameters:
   ID:
     Description: Unique identifier.
     Type: String
-  COMMIT_ID:
+  COMMIT-ID:
     Description: Unique identifier for commit.
     Type: String  
 
@@ -43,4 +43,4 @@ Outputs:
     Description: URL for website hosted on S3
     Export:
             Name:
-                Fn::Sub: "${ID}-frontend-${COMMIT_ID}-weburl"
+                Fn::Sub: "${ID}-frontend-${COMMIT-ID}-weburl"

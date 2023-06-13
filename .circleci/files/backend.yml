@@ -5,7 +5,7 @@ Parameters:
   ID:
     Description: Unique identifier.
     Type: String
-  COMMIT_ID:
+  COMMIT-ID:
     Description: Unique identifier for commit.
     Type: String  
 
