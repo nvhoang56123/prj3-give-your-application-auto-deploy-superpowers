@@ -187,7 +187,7 @@ jobs:
       - destroy-environment:
           environment-name: front-end
       #- destroy-environment:
-      #    environment-name: back-end
+      #   environment-name: back-end
 
   configure-infrastructure:
     executor:
