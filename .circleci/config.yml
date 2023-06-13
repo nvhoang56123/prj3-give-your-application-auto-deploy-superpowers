@@ -28,6 +28,9 @@ commands:
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
+      commit-key:
+        type: string
+        default: ""
       # Add parameter here     
     steps:
       - run:
@@ -222,7 +225,7 @@ jobs:
 
             echo "No migration"
       - revert-migrations:
-          migrations-key: migration_$CUR_SHORT_HASH    
+          commit-key: migration_$CUR_SHORT_HASH    
 
   deploy-frontend:
     executor: 
