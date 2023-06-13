@@ -5,7 +5,7 @@ Parameters:
   ID:
     Description: Unique identifier.
     Type: String
-  COMMIT-ID:
+  COMMITID:
     Description: Unique identifier for commit.
     Type: String  
 
@@ -46,4 +46,4 @@ Outputs:
             Fn::GetAtt: "EC2Instance.PublicIp"
         Export:
             Name:
-                Fn::Sub: "${ID}-backend-${COMMIT-ID}-public-dns"
+                Fn::Sub: "${ID}-backend-${COMMITID}-public-dns"
