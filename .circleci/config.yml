@@ -144,6 +144,8 @@ jobs:
     steps:
       # Checkout code from git
       - checkout
+      # Export environment variable
+      - exports
       - aws-cli/setup:
           aws-access-key-id: AWS_ACCESS_KEY
           aws-secret-access-key: AWS_ACCESS_SECRET
@@ -154,7 +156,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
               --tags project=prj3-hnguyen3 \
-              --stack-name "prj3-hnguyen3-back-end" \
+              --stack-name "prj3-hnguyen3-back-end-$CURRENT_COMMIT" \
               --parameter-overrides ID="prj3-hnguyen3"                
       - run:
           name: Ensure front-end infrastructure exist
@@ -162,7 +164,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --tags project=yprj3-hnguyen3 \
-              --stack-name "prj3-hnguyen3-front-end" \
+              --stack-name "prj3-hnguyen3-front-end-$CURRENT_COMMIT" \
               --parameter-overrides ID="prj3-hnguyen3"  
       - run:
           name: Add back-end ip to ansible inventory
@@ -173,7 +175,11 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      # Here's where you will add some code to rollback on failure      
+      # Here's where you will add some code to rollback on failure     
+      - destroy_infrastructure:
+          stack_name: prj3-hnguyen3-front-end-$CURRENT_COMMIT 
+      - destroy_infrastructure:
+          stack_name: prj3-hnguyen3-back-end-$CURRENT_COMMIT 
 
   configure-infrastructure:
     executor:
