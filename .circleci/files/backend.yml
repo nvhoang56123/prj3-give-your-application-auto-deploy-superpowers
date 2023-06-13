@@ -38,8 +38,9 @@ Resources:
 
 Outputs:
     EC2Instance:
-        Description: "Output for the created EC2Instance"
-        Value: !Ref EC2Instance
+        Description: "Output Public DNS for the created EC2Instance"
+        Value: 
+            Fn::GetAtt: "EC2Instance.PublicIp"
         Export:
             Name:
-                Fn::Sub: "${ID}-backend"
+                Fn::Sub: "${ID}-backend-public-dns"
