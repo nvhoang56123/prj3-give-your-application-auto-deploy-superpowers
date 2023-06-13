@@ -165,8 +165,7 @@ jobs:
               --template-file .circleci/files/backend.yml \
               --tags project=prj3-hnguyen3 \
               --stack-name "prj3-hnguyen3-back-end-$CURRENT_COMMIT_SHORT" \
-              --parameter-overrides ID="prj3-hnguyen3" \
-              --parameter-overrides COMMITID="$CURRENT_COMMIT_SHORT"                    
+              --parameter-overrides ID="prj3-hnguyen3", COMMITID="$CURRENT_COMMIT_SHORT"                       
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -174,8 +173,7 @@ jobs:
               --template-file .circleci/files/frontend.yml \
               --tags project=yprj3-hnguyen3 \
               --stack-name "prj3-hnguyen3-front-end-$CURRENT_COMMIT_SHORT" \
-              --parameter-overrides ID="prj3-hnguyen3"  
-              --parameter-overrides COMMITID="$CURRENT_COMMIT_SHORT"    
+              --parameter-overrides ID="prj3-hnguyen3", COMMITID="$CURRENT_COMMIT_SHORT"    
       - run:
           name: Add back-end ip to ansible inventory
           command: |
