@@ -10,7 +10,7 @@ Resources:
   WebsiteBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "udapeople-${ID}"
+      BucketName: !Sub "${ID}-udapeople"
       #AccessControl: PublicRead
       OwnershipControls:  # << Add
         Rules:
