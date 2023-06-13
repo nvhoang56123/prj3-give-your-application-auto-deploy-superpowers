@@ -46,4 +46,4 @@ Outputs:
             Fn::GetAtt: "EC2Instance.PublicIp"
         Export:
             Name:
-                Fn::Sub: "${ID}-backend-${COMMIT_ID}-public-dns"
+                Fn::Sub: "${ID}-backend-${COMMIT-ID}-public-dns"
