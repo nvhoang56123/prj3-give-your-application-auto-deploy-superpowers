@@ -68,19 +68,17 @@ jobs:
       - run:
           name: Back-end build
           working_directory: ./backend
-          command: |     
-            ls
-            pwd       
+          command: |       
             npm install
             npm run build
             cd ..
             tar -C backend -czvf backend.tar.gz .            
-            # Move the compressed file to workspace folder
-            mv backend.tar.gz ../backend.tar.gz
+            rm -f ../../frontend.tar.gz
+            cp backend.tar.gz ../../backend.tar.gz
+            ls /home/circleci/workspace
       - save_cache:
           paths: 
             - backend/node_modules
-            - backend.tar.gz
           key: backend-build
   build-frontend:
     docker:
@@ -98,10 +96,12 @@ jobs:
             npm install
             npm run build            
             tar -czvf "frontend.tar.gz" dist
+            rm -f ../../frontend.tar.gz
+            cp frontend.tar.gz ../../frontend.tar.gz
+            ls /home/circleci/workspace
       - save_cache:
           paths: 
             - backend/node_modules
-            - frontend.tar.gz
           key: frontend-build
   
   test-frontend:
