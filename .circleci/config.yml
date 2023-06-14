@@ -216,7 +216,7 @@ jobs:
             echo "${static_host}"
             echo $static_host > websiteurl    
       - persist_to_workspace:
-          root: ./
+          root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
             - project/websiteurl
