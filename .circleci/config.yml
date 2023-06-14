@@ -50,14 +50,35 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
+      - run: 
+          name: Save all db varibles in env file 
+          working_directory: ~/backend
+          command: |            
+            touch .env
+            echo NODE_ENV=production >> .env
+            echo TYPEORM_HOST=$TYPEORM_HOST >> .env
+            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> .env
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> .env
+            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> .env
+            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> .env
+            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> .env
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> .env
+            echo TYPEORM_PORT=$TYPEORM_PORT >> .env
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> .env
       - run:
           name: Back-end build
           working_directory: ~/backend
           command: |            
             npm install
             npm run build
+            cd ..
+            tar -C backend -czvf backend.tar.gz .            
+            # Move the compressed file to workspace folder
+            mv backend.tar.gz ../backend.tar.gz
       - save_cache:
-          paths: [backend/node_modules]
+          paths: 
+            - backend/node_modules
+            - backend.tar.gz
           key: backend-build
   build-frontend:
     docker:
@@ -71,10 +92,14 @@ jobs:
           working_directory: ~/frontend
           command: |
             npm install
-            npm run build
+            npm run build            
+            tar -czvf "frontend.tar.gz" dist
       - save_cache:
-          paths: [frontend/node_modules]
+          paths: 
+            - backend/node_modules
+            - frontend.tar.gz
           key: frontend-build
+  
   test-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -90,6 +115,7 @@ jobs:
           working_directory: ~/frontend
           command: |
             echo "Temporary no test"    
+
   test-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -219,7 +245,7 @@ jobs:
       - run:
           name: Run Playbook and Configure server
           command: |
-            ansible-playbook -i inventory.txt $(eval echo .circleci/ansible/configure-server.yml)
+            ls
       # Here's where you will add some code to rollback on failure      
       - destroy-environment:
         environment-name: front-end
@@ -262,22 +288,33 @@ jobs:
     steps:
       # Checkout code from git
       - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            # your code here
-      - run:
-          name: Get backend url
-          command: |
-            # your code here
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
+      - exports
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_ACCESS_SECRET
+          aws-region: AWS_REGION_NAME
+      - restore_cache:
+          keys: [frontend-build]
       - run:
           name: Deploy frontend objects
           command: |
-            # your code here
+            cd $(eval echo "$CIRCLE_WORKING_DIRECTORY/$PROJECT_ROOT_DIR/frontend")
+            # Create .env file
+            touch .env
+            # Get backend URL
+            API_URL=$(cat $WORKSPACE_DIR/backendpublicdns)
+            echo API_URL="$API_URL" > .env
+            # Install node modules
+            npm install
+            # Build project
+            npm run build
+            aws s3 sync dist s3://udapeople-frontend-$CURRENT_COMMIT_SHORT --delete
       # Here's where you will add some code to rollback on failure      
-                    
+      - destroy-environment:
+        environment-name: front-end
+      - destroy-environment:
+        environment-name: back-end                   
+  
   deploy-backend:
     executor: 
       name: python/default
@@ -285,40 +322,83 @@ jobs:
     steps:
       # Checkout code from git
       - checkout
-      # Add ssh keys with fingerprint
-      # attach workspace
-      - run:
-          name: Install dependencies
-          command: |
-            # your code here
+      # Export environment variable
+      - exports
+      - add_ssh_keys:
+          fingerprints: ["c2:84:20:b3:bc:15:1b:1c:2e:32:54:00:98:f8:7d:81"]
+      - python/install-packages:
+          args: ansible
+      - attach_workspace:
+          at: /home/circleci/workspace
       - run:
           name: Deploy backend
           command: |
-            # your code here
-      # Here's where you will add some code to rollback on failure  
+            # Move the compressed file to ansible folder
+            # no error if existing, make parent directories as needed
+            mkdir --parents .circleci/ansible/roles/deploy/files
+            mv backend.tar.gz .circleci/ansible/roles/deploy/files/backend.tar.gz
+      - run:
+          name: "Ansible play book for deploy backend"
+          command: |
+            ls
+      # Here's where you will add some code to rollback on failure      
+      - destroy-environment:
+        environment-name: front-end
+      - destroy-environment:
+        environment-name: back-end     
 
   smoke-test:
     executor: aws-cli/default
     steps:
       # Checkout code from git
       - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            # your code here
-      - run:
-          name: Get backend url
-          command: |
-            # your code here
-      - run:
-          name: Backend smoke test.
-          command: |
-            # your code here
+      # Export environment variable
+      - exports
+      # Set up AWS Credentials
+      - aws-cli/setup
+      - attach_workspace:
+          at: /home/circleci/workspace
       - run:
           name: Frontend smoke test.
           command: |
-            # your code here
+            static_host=$(cat $WORKSPACE_DIR/websiteurl)
+            URL="http://$static_host/#/employees"
+            echo ${URL}
+            test_result=$(curl -s "$URL")
+            if echo $test_result | grep "Welcome" > /dev/null
+            then
+              echo "Frontend test passed"
+              echo $test_result
+              exit 0
+            else
+              echo $test_result
+              exit 1
+            fi
+      - run:
+          name: "Backend smoke test"
+          command: |
+            API_URL=$(cat $WORKSPACE_DIR/backendpublicdns)
+            echo $API_URL
+            curl --version
+            # When the backend server is not ready, let retry upto 30mins
+            test_result=$(eval curl \
+              --verbose --fail \
+              --retry 360 --retry-max-time 1800 --retry-all-errors \
+              --url "$API_URL/api/status")
+            if echo $test_result | grep "ok" > /dev/null
+            then
+              echo "Backend test passed"
+              echo $test_result
+              exit 0
+            else
+              echo $test_result
+              exit 1
+            fi
       # Here's where you will add some code to rollback on failure  
+      - destroy-environment:
+        environment-name: front-end
+      - destroy-environment:
+        environment-name: back-end 
 
   cloudfront-update:
     docker:
@@ -367,14 +447,8 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-frontend:
-          filters:
-            branches:
-              only: [master]
-      - build-backend:
-          filters:
-            branches:
-              only: [master]
+      - build-frontend
+      - build-backend
       - test-frontend:
           requires: [build-frontend]
       - test-backend:
@@ -384,7 +458,7 @@ workflows:
       - scan-frontend:
           requires: [build-frontend]
       - deploy-infrastructure:
-          #requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
             branches:
               only: [main]
