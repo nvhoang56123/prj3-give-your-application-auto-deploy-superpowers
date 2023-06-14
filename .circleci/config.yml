@@ -202,13 +202,14 @@ jobs:
             host=$(aws cloudformation list-exports \
             --query "Exports[?Name==\`prj3-hnguyen3-backend-$CURRENT_COMMIT_SHORT-public-dns\`].Value" \
             --no-paginate --output text)
-            echo $host >> $(eval echo ".circleci/ansible/inventory.txt")            
-            cp $(eval echo ".circleci/ansible/inventory.txt inventory.txt")            
+            echo $host >> .circleci/ansible/inventory.txt
+            cp .circleci/ansible/inventory.txt inventory.txt
             API_URL="http://${host}:3030"
             echo "${API_URL}"
             echo $API_URL > backendhost
-            rm -f ../backendhost
-            cp backendhost ../backendhost
+            rm -f ../backendhost ../inventory.txt
+            cp backendhost backendhost ../backendhost
+            cp backendhost inventory.txt ../inventory.txt
             echo "Double check files in /home/circleci/project"
             ls /home/circleci/project
       - run:
@@ -235,11 +236,12 @@ jobs:
             echo "Double check files in /home/circleci/project"
             ls /home/circleci/project
       - persist_to_workspace:
-          root: ~/
+          root: ./
           paths:
-            - project/.circleci/ansible/inventory.txt
-            - project/websiteurl
-            - project/backendhost
+            - .circleci/ansible/inventory.txt
+            - websiteurl
+            - backendhost
+            - inventory.txt
       # Here's where you will add some code to rollback on failure     
       - destroy-environment:
             environment-name: front-end
@@ -282,11 +284,16 @@ jobs:
       - checkout
       # Checkout code from git
       - exports
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_ACCESS_SECRET
+          aws-region: AWS_REGION_NAME
       - run:
           name: Run migrations
           working_directory: ./backend
           command: |       
             npm install
+            npm audit fix
             npm run migrations > migrations.out            
             cat migrations.out
       - run:
