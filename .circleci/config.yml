@@ -39,6 +39,7 @@ commands:
       - run:
           name: Revert migrations
           when: "on_fail"
+          working_directory: ./backend
           command: |
             npm install
             npm run migrations:revert
@@ -77,6 +78,10 @@ jobs:
             cp backend.tar.gz ../backend.tar.gz
             echo "Double check files in /home/circleci/project"
             ls /home/circleci/project
+      - persist_to_workspace:
+          root: /home/circleci/project
+          paths:
+            - "backend.tar.gz"
       - save_cache:
           paths: 
             - backend/node_modules
@@ -101,6 +106,10 @@ jobs:
             cp frontend.tar.gz ../frontend.tar.gz
             echo "Double check files in /home/circleci/project"
             ls /home/circleci/project
+      - persist_to_workspace:
+          root: /home/circleci/project
+          paths:
+            - "frontend.tar.gz"
       - save_cache:
           paths: 
             - backend/node_modules
@@ -255,7 +264,7 @@ jobs:
       - python/install-packages:
           args: ansible
       - attach_workspace:
-          at: /home/circleci/workspace
+          at: /home/circleci/project
       - run:
           name: Run Playbook and Configure server
           command: |
@@ -278,7 +287,6 @@ jobs:
           working_directory: ./backend
           command: |       
             npm install
-            npm audit fix --force
             npm run migrations > migrations.out            
             cat migrations.out
       - run:
@@ -294,6 +302,11 @@ jobs:
               git commit --allow-empty -m "Trigger deployment"
               echo `git rev-parse --short HEAD` > current-hash.txt
             echo "No migration"
+      # Here's where you will add some code to rollback on failure      
+      - destroy-environment:
+          environment-name: front-end
+      - destroy-environment:
+          environment-name: back-end      
       - revert-migrations
 
   deploy-frontend:
@@ -344,7 +357,7 @@ jobs:
       - python/install-packages:
           args: ansible
       - attach_workspace:
-          at: /home/circleci/workspace
+          at: /home/circleci/project
       - run:
           name: Deploy backend
           command: |
@@ -372,7 +385,7 @@ jobs:
       # Set up AWS Credentials
       - aws-cli/setup
       - attach_workspace:
-          at: /home/circleci/workspace
+          at: /home/circleci/project
       - run:
           name: Frontend smoke test.
           command: |
