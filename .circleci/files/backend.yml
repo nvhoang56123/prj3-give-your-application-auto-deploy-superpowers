@@ -37,7 +37,7 @@ Resources:
       ImageId: ami-0715c1897453cabd1 
       Tags:
         - Key: Name
-          Value: !Sub ${ID}-backend
+          Value: !Sub ${ID}-backend-${COMMITID}
 
 Outputs:
     EC2Instance:
