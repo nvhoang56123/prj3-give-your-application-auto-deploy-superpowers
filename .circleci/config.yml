@@ -208,8 +208,8 @@ jobs:
             echo "${API_URL}"
             echo $API_URL > backendhost
             rm -f ../backendhost ../inventory.txt
-            cp backendhost backendhost ../backendhost
-            cp backendhost inventory.txt ../inventory.txt
+            cp backendhost ../backendhost
+            cp inventory.txt ../inventory.txt
             echo "Double check files in /home/circleci/project"
             ls /home/circleci/project
       - run:
