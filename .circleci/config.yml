@@ -73,8 +73,9 @@ jobs:
             npm run build
             cd ..
             tar -C backend -czvf backend.tar.gz .            
-            rm -f ../../frontend.tar.gz
-            cp backend.tar.gz ../../backend.tar.gz
+            rm -f ../frontend.tar.gz
+            cp backend.tar.gz ../backend.tar.gz
+            echo "Double check files in /home/circleci/project"
             ls /home/circleci/project
       - save_cache:
           paths: 
@@ -96,8 +97,9 @@ jobs:
             npm install
             npm run build            
             tar -czvf "frontend.tar.gz" dist
-            rm -f ../../frontend.tar.gz
-            cp frontend.tar.gz ../../frontend.tar.gz
+            rm -f ../frontend.tar.gz
+            cp frontend.tar.gz ../frontend.tar.gz
+            echo "Double check files in /home/circleci/project"
             ls /home/circleci/project
       - save_cache:
           paths: 
@@ -196,6 +198,10 @@ jobs:
             API_URL="http://${host}:3030"
             echo "${API_URL}"
             echo $API_URL > backendhost
+            rm -f ../backendhost
+            cp backendhost ../backendhost
+            echo "Double check files in /home/circleci/project"
+            ls /home/circleci/project
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -215,6 +221,10 @@ jobs:
             static_host=${host#*//}
             echo "${static_host}"
             echo $static_host > websiteurl    
+            rm -f ../websiteurl
+            cp websiteurl ../websiteurl
+            echo "Double check files in /home/circleci/project"
+            ls /home/circleci/project
       - persist_to_workspace:
           root: ~/
           paths:
