@@ -204,9 +204,9 @@ jobs:
             - project/backendhost
       # Here's where you will add some code to rollback on failure     
       - destroy-environment:
-          environment-name: front-end
+        environment-name: front-end
       - destroy-environment:
-         environment-name: back-end
+        environment-name: back-end
 
   configure-infrastructure:
     executor:
