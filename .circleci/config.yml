@@ -85,6 +85,10 @@ jobs:
             cd frontend
             npm install
             npm run build
+      - persist_to_workspace:
+          root: /home/circleci/project
+          paths:
+            - "frontend/node_modules"
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
@@ -102,6 +106,10 @@ jobs:
             cd backend
             npm install
             npm run build
+      - persist_to_workspace:
+          root: /home/circleci/project
+          paths:
+            - "backend/node_modules"
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
@@ -117,7 +125,7 @@ jobs:
           name: Frontend Test
           command: |
             cd frontend
-            npm install
+            #npm install
             npm run test
 
   test-backend:
@@ -131,7 +139,7 @@ jobs:
           name: Back-end Test
           command: |
             cd backend
-            npm install
+            #npm install
             npm run test
 
   scan-frontend:
