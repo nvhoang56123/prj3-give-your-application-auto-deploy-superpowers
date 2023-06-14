@@ -68,7 +68,9 @@ jobs:
       - run:
           name: Back-end build
           working_directory: ~/backend
-          command: |            
+          command: |     
+            ls
+            pwd       
             npm install
             npm run build
             cd ..
@@ -91,6 +93,8 @@ jobs:
           name: Build front-end
           working_directory: ~/frontend
           command: |
+            ls
+            pwd            
             npm install
             npm run build            
             tar -czvf "frontend.tar.gz" dist
