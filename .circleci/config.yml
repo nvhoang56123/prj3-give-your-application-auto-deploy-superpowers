@@ -217,6 +217,10 @@ jobs:
       - checkout
       # Export environment variable
       - exports
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_ACCESS_SECRET
+          aws-region: AWS_REGION_NAME
       - add_ssh_keys:
           fingerprints: ["c2:84:20:b3:bc:15:1b:1c:2e:32:54:00:98:f8:7d:81"]
       - python/install-packages:
@@ -226,7 +230,7 @@ jobs:
       - run:
           name: Run Playbook and Configure server
           command: |
-            ansible-playbook -i inventory.txt $(eval echo .circleci/ansible/configure-server.yml")
+            ansible-playbook -i inventory.txt $(eval echo .circleci/ansible/configure-server.yml)
       # Here's where you will add some code to rollback on failure      
       - destroy-environment:
         environment-name: front-end
@@ -258,7 +262,7 @@ jobs:
               git config user.name "Deployment Bot"
               git commit --allow-empty -m "Trigger deployment"
               echo `git rev-parse --short HEAD` > current-hash.txt
-              git push -q https://${GITHUB_TOKEN}@https://github.com/nvhoang56123/prj3-give-your-application-auto-deploy-superpowers main
+              git push -q https://${GITHUB_TOKEN}@github.com/nvhoang56123/prj3-give-your-application-auto-deploy-superpowers main
 
             echo "No migration"
       - revert-migrations:
