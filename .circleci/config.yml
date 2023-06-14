@@ -75,7 +75,7 @@ jobs:
             tar -C backend -czvf backend.tar.gz .            
             rm -f ../../frontend.tar.gz
             cp backend.tar.gz ../../backend.tar.gz
-            ls /home/circleci/workspace
+            ls /home/circleci/project
       - save_cache:
           paths: 
             - backend/node_modules
@@ -98,7 +98,7 @@ jobs:
             tar -czvf "frontend.tar.gz" dist
             rm -f ../../frontend.tar.gz
             cp frontend.tar.gz ../../frontend.tar.gz
-            ls /home/circleci/workspace
+            ls /home/circleci/project
       - save_cache:
           paths: 
             - backend/node_modules
