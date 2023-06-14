@@ -215,19 +215,23 @@ jobs:
     steps:
       # Checkout code from git
       - checkout
-      # Add ssh keys with fingerprint
-      # attach workspace
+      # Export environment variable
+      - exports
+      - add_ssh_keys:
+          fingerprints: ["c2:84:20:b3:bc:15:1b:1c:2e:32:54:00:98:f8:7d:81"]
+      - python/install-packages:
+          args: ansible
+      - attach_workspace:
+          at: /home/circleci/workspace
       - run:
-          name: Install dependencies
+          name: Run Playbook and Configure server
           command: |
-            # Your code here
-            exit 1
-      - run:
-          name: Configure server
-          command: |
-            # Your code here
-            exit 1
+            ansible-playbook -i inventory.txt $(eval echo .circleci/ansible/configure-server.yml")
       # Here's where you will add some code to rollback on failure      
+      - destroy-environment:
+          environment-name: front-end
+      - destroy-environment:
+         environment-name: back-end
 
   run-migrations:
     docker:
