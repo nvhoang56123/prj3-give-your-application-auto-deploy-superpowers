@@ -18,7 +18,7 @@ commands:
           aws-region: AWS_REGION_NAME
       - run:
           name: Destroy environments
-          when: on_fail
+          when: "on_fail"
           command: |
              aws cloudformation delete-stack \
               --stack-name "prj3-hnguyen3-<<parameters.environment-name>>-$CURRENT_COMMIT_SHORT" \
@@ -53,7 +53,6 @@ commands:
               npm install
               npm run migrations:revert
             fi
-
 jobs:
   build-backend:
     docker:
@@ -197,15 +196,12 @@ jobs:
             static_host=${host#*//}
             echo "${static_host}"
             echo $static_host > websiteurl    
-      - run:
-          name: Add back-end ip to ansible inventory
-          command: |
-            # Your code here
-            exit 1
       - persist_to_workspace:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
+            - project/websiteurl
+            - project/backendhost
       # Here's where you will add some code to rollback on failure     
       - destroy-environment:
           environment-name: front-end
