@@ -52,7 +52,7 @@ jobs:
           keys: [backend-build]
       - run: 
           name: Save all db varibles in env file 
-          working_directory: ~/backend
+          working_directory: ./backend
           command: |            
             touch .env
             echo NODE_ENV=production >> .env
@@ -116,7 +116,7 @@ jobs:
       # Your job code here   
       - run:
           name: Test-frontend
-          working_directory: ~/frontend
+          working_directory: ./frontend
           command: |
             echo "Temporary no test"    
 
@@ -131,7 +131,7 @@ jobs:
       # Your job code here    
       - run:
           name: test-backend
-          working_directory: ~/backend
+          working_directory: ./backend
           command: |
             # Your code here
             npm install
@@ -145,7 +145,7 @@ jobs:
       # Your job code here
       - run:
           name: scan-frontend
-          working_directory: ~/frontend
+          working_directory: ./frontend
           command: |
             # Your code here            
             npm install
@@ -160,7 +160,7 @@ jobs:
       # Your job code here
       - run:
           name: scan-backend
-          working_directory: ~/backend
+          working_directory: ./backend
           command: |
             # Your code here            
             npm install
@@ -216,7 +216,7 @@ jobs:
             echo "${static_host}"
             echo $static_host > websiteurl    
       - persist_to_workspace:
-          root: ~/
+          root: ./
           paths:
             - project/.circleci/ansible/inventory.txt
             - project/websiteurl
@@ -265,14 +265,14 @@ jobs:
       - exports
       - run:
           name: Run migrations
-          working_directory: ~/backend
+          working_directory: ./backend
           command: |       
             npm install
             npm run migrations > migrations.out            
             cat migrations.out
       - run:
           name: Send migration results to git
-          working_directory: ~/backend
+          working_directory: ./backend
           command: |
             grep -q "has been executed successfully." migrations.out; 
             [ $? -eq 0 ] 
