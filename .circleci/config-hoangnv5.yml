@@ -1,0 +1,515 @@
+version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@3.1.5
+  python: circleci/python@2.1.1
+
+commands:
+  destroy-environment:
+    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+    parameters:
+      environment-name:
+        type: string
+        default: ""
+    steps:
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_ACCESS_SECRET
+          aws-region: AWS_REGION_NAME
+      - run:
+          name: Destroy environments
+          when: "on_fail"
+          command: |
+             aws cloudformation delete-stack \
+              --stack-name "prj3-hnguyen3-<<parameters.environment-name>>-$CURRENT_COMMIT_SHORT" \
+  exports:
+    steps:
+      - run:
+          name: "Get Current and Previous commit"
+          command: |
+            # Git hash for the current commit
+            echo 'export CURRENT_COMMIT=`git show HEAD`' >> "$BASH_ENV"
+            echo 'export CURRENT_COMMIT_SHORT=`git rev-parse --short HEAD`' >> "$BASH_ENV"
+            echo 'export PREVIOUS_COMMIT=`git show HEAD^1`' >> "$BASH_ENV"
+            echo 'export PREVIOUS_COMMIT_SHORT=`git rev-parse --short HEAD^1`' >> "$BASH_ENV"
+
+  revert-migrations:
+    description: Revert the last migration if successfully run in the current workflow.   
+    steps:
+      - run:
+          name: Revert migrations
+          when: "on_fail"
+          working_directory: ./backend
+          command: |
+            npm install
+            npm run migrations:revert
+jobs:
+  build-backend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [backend-build]
+      - run: 
+          name: Save all db varibles in env file 
+          working_directory: ./backend
+          command: |            
+            touch .env
+            echo NODE_ENV=production >> .env
+            echo TYPEORM_HOST=$TYPEORM_HOST >> .env
+            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> .env
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> .env
+            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> .env
+            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> .env
+            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> .env
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> .env
+            echo TYPEORM_PORT=$TYPEORM_PORT >> .env
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> .env
+      - run:
+          name: Back-end build
+          working_directory: ./backend
+          command: |       
+            npm install
+            npm run build
+            cd ..
+            tar -C backend -czvf backend.tar.gz .            
+            rm -f ../frontend.tar.gz
+            cp backend.tar.gz ../backend.tar.gz
+            echo "Double check files in /home/circleci/project"
+            ls /home/circleci/project
+      - persist_to_workspace:
+          root: /home/circleci/project
+          paths:
+            - "backend.tar.gz"
+      - save_cache:
+          paths: 
+            - backend/node_modules
+          key: backend-build
+  build-frontend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [frontend-build]
+      - run:
+          name: Build front-end
+          working_directory: ./frontend
+          command: |
+            ls
+            pwd            
+            npm install
+            npm run build            
+            tar -czvf "frontend.tar.gz" dist
+            rm -f ../frontend.tar.gz
+            cp frontend.tar.gz ../frontend.tar.gz
+            echo "Double check files in /home/circleci/project"
+            ls /home/circleci/project
+      - persist_to_workspace:
+          root: /home/circleci/project
+          paths:
+            - "frontend.tar.gz"
+      - save_cache:
+          paths: 
+            - backend/node_modules
+          key: frontend-build
+  
+  test-frontend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [frontend-test]
+      # Checkout code from git
+      # Restore from cache
+      # Your job code here   
+      - run:
+          name: Test-frontend
+          working_directory: ./frontend
+          command: |
+            echo "Temporary no test"    
+
+  test-backend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [backend-test]
+      # Checkout code from git
+      # Your job code here    
+      - run:
+          name: test-backend
+          working_directory: ./backend
+          command: |
+            # Your code here
+            npm install
+            npm run test
+  scan-frontend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      # Restore from cache
+      # Your job code here
+      - run:
+          name: scan-frontend
+          working_directory: ./frontend
+          command: |
+            # Your code here            
+            npm install
+            npm audit fix --force
+  scan-backend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      # Checkout code from git
+      # Restore from cache
+      - checkout
+      # Your job code here
+      - run:
+          name: scan-backend
+          working_directory: ./backend
+          command: |
+            # Your code here            
+            npm install
+            npm audit fix --force
+  deploy-infrastructure:
+    executor: aws-cli/default
+    steps:
+      # Checkout code from git
+      - checkout
+      # Export environment variable
+      - exports
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_ACCESS_SECRET
+          aws-region: AWS_REGION_NAME
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --tags project=prj3-hnguyen3 \
+              --stack-name "prj3-hnguyen3-back-end-$CURRENT_COMMIT_SHORT" \
+              --parameter-overrides ID="prj3-hnguyen3" COMMITID="$CURRENT_COMMIT_SHORT"
+      - run:
+          name: "Get backend host"
+          command: |
+            touch backendhost
+            host=$(aws cloudformation list-exports \
+            --query "Exports[?Name==\`prj3-hnguyen3-backend-$CURRENT_COMMIT_SHORT-public-dns\`].Value" \
+            --no-paginate --output text)
+            echo $host >> .circleci/ansible/inventory.txt
+            cp .circleci/ansible/inventory.txt inventory.txt
+            API_URL="http://${host}:3030"
+            echo "${API_URL}"
+            echo $API_URL > backendhost
+            rm -f ../backendhost ../inventory.txt
+            cp backendhost ../backendhost
+            cp inventory.txt ../inventory.txt
+            echo "Double check files in /home/circleci/project"
+            ls /home/circleci/project
+      - run:
+          name: Ensure front-end infrastructure exist
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/frontend.yml \
+              --tags project=yprj3-hnguyen3 \
+              --stack-name "prj3-hnguyen3-front-end-$CURRENT_COMMIT_SHORT" \
+              --parameter-overrides ID="prj3-hnguyen3" COMMITID="$CURRENT_COMMIT_SHORT"
+      - run:
+          name: "Get frontend host"
+          command: |
+            touch websiteurl
+            static_export_name=Udapeople-Frontend-$CUR_SHORT_HASH-WebsiteURL
+            host=$(aws cloudformation list-exports \
+            --query "Exports[?Name==\`prj3-hnguyen3-frontend-$CURRENT_COMMIT_SHORT-weburl\`].Value" \
+            --no-paginate --output text)
+            static_host=${host#*//}
+            echo "${static_host}"
+            echo $static_host > websiteurl    
+            rm -f ../websiteurl
+            cp websiteurl ../websiteurl
+            echo "Double check files in /home/circleci/project"
+            ls /home/circleci/project
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - .circleci/ansible/inventory.txt
+            - websiteurl
+            - backendhost
+            - inventory.txt
+      # Here's where you will add some code to rollback on failure     
+      - destroy-environment:
+            environment-name: front-end
+      - destroy-environment:
+            environment-name: back-end
+
+  configure-infrastructure:
+    executor:
+      name: python/default
+      tag: "3.11.2"
+    steps:
+      # Checkout code from git
+      - checkout
+      # Export environment variable
+      - exports
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_ACCESS_SECRET
+          aws-region: AWS_REGION_NAME
+      - add_ssh_keys:
+          fingerprints: ["c2:84:20:b3:bc:15:1b:1c:2e:32:54:00:98:f8:7d:81"]
+      - python/install-packages:
+          args: ansible
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          name: Run Playbook and Configure server
+          command: |
+            ls
+      # Here's where you will add some code to rollback on failure      
+      - destroy-environment:
+          environment-name: front-end
+      - destroy-environment:
+          environment-name: back-end
+
+  run-migrations:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      # Checkout code from git
+      - exports
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_ACCESS_SECRET
+          aws-region: AWS_REGION_NAME
+      - restore_cache:
+          keys: [backend-build]
+      - run:
+          name: Run migrations
+          working_directory: ./backend
+          command: |       
+            npm install
+            npm audit fix
+            npm run migrations > migrations.out            
+            cat migrations.out
+      - run:
+          name: Send migration results to git
+          working_directory: ./backend
+          command: |
+            grep -q "has been executed successfully." migrations.out; 
+            [ $? -eq 0 ] 
+            then
+              git config credential.helper 'cache --timeout=120'
+              git config user.email "hoangnv5@fpt.com"
+              git config user.name "Deployment Bot"
+              git commit --allow-empty -m "Trigger deployment"
+              echo `git rev-parse --short HEAD` > current-hash.txt
+            echo "No migration"
+      # Here's where you will add some code to rollback on failure      
+      - destroy-environment:
+          environment-name: front-end
+      - destroy-environment:
+          environment-name: back-end      
+      - revert-migrations
+
+  deploy-frontend:
+    executor: 
+      name: python/default
+      tag: "3.11.2"
+    steps:
+      # Checkout code from git
+      - checkout
+      - exports
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_ACCESS_SECRET
+          aws-region: AWS_REGION_NAME
+      - restore_cache:
+          keys: [frontend-build]
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd $(eval echo "$CIRCLE_WORKING_DIRECTORY/$PROJECT_ROOT_DIR/frontend")
+            # Create .env file
+            touch .env
+            # Get backend URL
+            API_URL=$(cat $WORKSPACE_DIR/backendpublicdns)
+            echo API_URL="$API_URL" > .env
+            # Install node modules
+            npm install
+            # Build project
+            npm run build
+            aws s3 sync dist s3://udapeople-frontend-$CURRENT_COMMIT_SHORT --delete
+      # Here's where you will add some code to rollback on failure      
+      - destroy-environment:
+          environment-name: front-end
+      - destroy-environment:
+          environment-name: back-end                   
+  
+  deploy-backend:
+    executor: 
+      name: python/default
+      tag: "3.11.2"
+    steps:
+      # Checkout code from git
+      - checkout
+      # Export environment variable
+      - exports
+      - add_ssh_keys:
+          fingerprints: ["c2:84:20:b3:bc:15:1b:1c:2e:32:54:00:98:f8:7d:81"]
+      - python/install-packages:
+          args: ansible
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          name: Deploy backend
+          command: |
+            # Move the compressed file to ansible folder
+            # no error if existing, make parent directories as needed
+            mkdir --parents .circleci/ansible/roles/deploy/files
+            mv backend.tar.gz .circleci/ansible/roles/deploy/files/backend.tar.gz
+      - run:
+          name: "Ansible play book for deploy backend"
+          command: |
+            ls
+      # Here's where you will add some code to rollback on failure      
+      - destroy-environment:
+          environment-name: front-end
+      - destroy-environment:
+          environment-name: back-end     
+
+  smoke-test:
+    executor: aws-cli/default
+    steps:
+      # Checkout code from git
+      - checkout
+      # Export environment variable
+      - exports
+      # Set up AWS Credentials
+      - aws-cli/setup
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          name: Frontend smoke test.
+          command: |
+            static_host=$(cat $WORKSPACE_DIR/websiteurl)
+            URL="http://$static_host/#/employees"
+            echo ${URL}
+            test_result=$(curl -s "$URL")
+            if echo $test_result | grep "Welcome" > /dev/null
+            then
+              echo "Frontend test passed"
+              echo $test_result
+              exit 0
+            else
+              echo $test_result
+              exit 1
+            fi
+      - run:
+          name: "Backend smoke test"
+          command: |
+            API_URL=$(cat $WORKSPACE_DIR/backendpublicdns)
+            echo $API_URL
+            curl --version
+            # When the backend server is not ready, let retry upto 30mins
+            test_result=$(eval curl \
+              --verbose --fail \
+              --retry 360 --retry-max-time 1800 --retry-all-errors \
+              --url "$API_URL/api/status")
+            if echo $test_result | grep "ok" > /dev/null
+            then
+              echo "Backend test passed"
+              echo $test_result
+              exit 0
+            else
+              echo $test_result
+              exit 1
+            fi
+      # Here's where you will add some code to rollback on failure  
+      - destroy-environment:
+          environment-name: front-end
+      - destroy-environment:
+          environment-name: back-end 
+
+  cloudfront-update:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      # Checkout code from git
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            # Your code here
+            pwd
+            ls
+      - run:
+          name: Update cloudfront distribution
+          command: |
+            # Your code here
+            pwd
+            ls
+      # Here's where you will add some code to rollback on failure  
+      - run:
+          name: scan-frontend
+          command: |
+            # Your code here
+            pwd
+            ls
+  cleanup:
+    executor: aws-cli/default
+    steps:
+      # Checkout code from git
+      - checkout
+      - run:
+          name: Get old stack workflow id
+          command: |
+            # your code here
+            export OldWorkflowID="the id here"
+            export STACKS=[] #put the list of stacks here
+      - run:
+          name: Remove old stacks and files
+          command: |
+            if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
+            then
+              # your code here
+            fi          
+
+workflows:
+  default:
+    jobs:
+      - build-frontend
+      - build-backend
+      - test-frontend:
+          requires: [build-frontend]
+      - test-backend:
+          requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          filters:
+            branches:
+              only: [main]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
+      - cloudfront-update:
+          requires: [smoke-test]
+      - cleanup:
+          requires: [cloudfront-update]
