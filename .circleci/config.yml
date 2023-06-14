@@ -34,25 +34,14 @@ commands:
             echo 'export PREVIOUS_COMMIT_SHORT=`git rev-parse --short HEAD^1`' >> "$BASH_ENV"
 
   revert-migrations:
-    description: Revert the last migration if successfully run in the current workflow.
-    parameters:
-      commit-key:
-        type: string
-        default: ""
-      # Add parameter here     
+    description: Revert the last migration if successfully run in the current workflow.   
     steps:
       - run:
           name: Revert migrations
           when: "on_fail"
           command: |
-            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1
-            if(( $SUCCESS==1 )); 
-            then
-              cd backend
-              npm install
-              npm run migrations:revert
-            fi
+            npm install
+            npm run migrations:revert
 jobs:
   build-backend:
     docker:
@@ -243,6 +232,7 @@ jobs:
     steps:
       - checkout
       # Checkout code from git
+      - exports
       - run:
           name: Run migrations
           working_directory: ~/backend
@@ -262,11 +252,8 @@ jobs:
               git config user.name "Deployment Bot"
               git commit --allow-empty -m "Trigger deployment"
               echo `git rev-parse --short HEAD` > current-hash.txt
-              git push -q https://${GITHUB_TOKEN}@github.com/nvhoang56123/prj3-give-your-application-auto-deploy-superpowers main
-
             echo "No migration"
-      - revert-migrations:
-          commit-key: migration_$CUR_SHORT_HASH    
+      - revert-migrations
 
   deploy-frontend:
     executor: 
