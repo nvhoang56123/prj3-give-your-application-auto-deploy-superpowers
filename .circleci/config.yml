@@ -223,9 +223,9 @@ jobs:
             - project/backendhost
       # Here's where you will add some code to rollback on failure     
       - destroy-environment:
-        environment-name: front-end
+            environment-name: front-end
       - destroy-environment:
-        environment-name: back-end
+            environment-name: back-end
 
   configure-infrastructure:
     executor:
@@ -252,9 +252,9 @@ jobs:
             ls
       # Here's where you will add some code to rollback on failure      
       - destroy-environment:
-        environment-name: front-end
+          environment-name: front-end
       - destroy-environment:
-        environment-name: back-end
+          environment-name: back-end
 
   run-migrations:
     docker:
@@ -268,6 +268,7 @@ jobs:
           working_directory: ./backend
           command: |       
             npm install
+            npm audit fix --force
             npm run migrations > migrations.out            
             cat migrations.out
       - run:
@@ -315,9 +316,9 @@ jobs:
             aws s3 sync dist s3://udapeople-frontend-$CURRENT_COMMIT_SHORT --delete
       # Here's where you will add some code to rollback on failure      
       - destroy-environment:
-        environment-name: front-end
+          environment-name: front-end
       - destroy-environment:
-        environment-name: back-end                   
+          environment-name: back-end                   
   
   deploy-backend:
     executor: 
@@ -347,9 +348,9 @@ jobs:
             ls
       # Here's where you will add some code to rollback on failure      
       - destroy-environment:
-        environment-name: front-end
+          environment-name: front-end
       - destroy-environment:
-        environment-name: back-end     
+          environment-name: back-end     
 
   smoke-test:
     executor: aws-cli/default
@@ -400,9 +401,9 @@ jobs:
             fi
       # Here's where you will add some code to rollback on failure  
       - destroy-environment:
-        environment-name: front-end
+          environment-name: front-end
       - destroy-environment:
-        environment-name: back-end 
+          environment-name: back-end 
 
   cloudfront-update:
     docker:
