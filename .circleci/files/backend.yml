@@ -50,4 +50,6 @@ Outputs:
                 #Fn::Sub: "backend-${COMMITID}"
     WorkflowID:
         Description: "Export WorkflowID for promotion"
-        Value: "${COMMITID"
+        Value: "${COMMITID}"
+        Export:
+            Name: "WorkflowID"                
