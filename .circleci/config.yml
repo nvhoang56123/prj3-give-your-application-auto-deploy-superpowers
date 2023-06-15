@@ -467,7 +467,7 @@ jobs:
 
             if [[ ( "$CurrentWorkflowID" != "$OldWorkflowID" ) && ( ! -z "$OldWorkflowID" ) ]]
             then
-              if aws s3api head-bucket --bucket "prj3-hnguyen3-udapeople-${OldWorkflowID}" 2>/dev/null 
+              if aws s3api head-bucket --bucket "prj3-hnguyen3-udapeople-${OldWorkflowID}" 2>/dev/null;
               then
                 echo "$OldWorkflowID!=$CurrentWorkflowID => will delete old version"
                 aws s3 rm s3://prj3-hnguyen3-udapeople-${OldWorkflowID} --recursive >       
