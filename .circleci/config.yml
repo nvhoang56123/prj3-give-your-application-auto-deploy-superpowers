@@ -469,14 +469,13 @@ jobs:
             then
               BUCKET_EXISTS=$(aws s3api head-bucket --bucket prj3-hnguyen3-udapeople-${OldWorkflowID} 2>&1 || true)
               if [ -z "$BUCKET_EXISTS" ]; then
-                echo "Bucket exists"
+                echo "$OldWorkflowID!=$CurrentWorkflowID => will delete old version"
+                aws s3 rm s3://prj3-hnguyen3-udapeople-${OldWorkflowID} --recursive    
+                aws cloudformation delete-stack --stack-name udapeople-frontend-${OldWorkflowID} 
+                aws cloudformation delete-stack --stack-name udapeople-backend-${OldWorkflowID} 
               else
-                echo "Bucket does not exist"
-              fi
-              echo "$OldWorkflowID!=$CurrentWorkflowID => will delete old version"
-              aws s3 rm s3://prj3-hnguyen3-udapeople-${OldWorkflowID} --recursive    
-              aws cloudformation delete-stack --stack-name udapeople-frontend-${OldWorkflowID} 
-              aws cloudformation delete-stack --stack-name udapeople-backend-${OldWorkflowID} 
+                echo "Bucket prj3-hnguyen3-udapeople-${OldWorkflowID} does not exist. Skipping bucket empty action."
+              fi              
             else
               echo "$OldWorkflowID==$CurrentWorkflowID => nothing needs to be done..."
             fi
