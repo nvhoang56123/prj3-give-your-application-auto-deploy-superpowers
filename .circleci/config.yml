@@ -11,8 +11,10 @@ commands:
       - run:
           name: "Set some pre-define parameters"
           command: |            
-            echo 'export CURRENT_COMMIT=`git rev-parse --short HEAD`' >> "$BASH_ENV"
-            echo 'export PRJ_NAME="prj3-hnguyen3"' >> "$BASH_ENV"
+            CURRENT_COMMIT=`git rev-parse --short HEAD`
+            echo $CURRENT_COMMIT >> "$BASH_ENV"
+            export PRJ_NAME="prj3-hnguyen3"' >> "$BASH_ENV"
+            echo $PRJ_NAME >> "$BASH_ENV"
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given an ID.
     parameters:
@@ -71,12 +73,15 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - exports
       - restore_cache:
           keys: [frontend-cache]
       - run:
           name: Build front-end
           working_directory: ./frontend
-          command: |            
+          command: | 
+            echo $CURRENT_COMMIT
+            echo $PRJ_NAME
             npm install
             npm run build
       - persist_to_workspace:
