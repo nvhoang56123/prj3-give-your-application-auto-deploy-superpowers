@@ -78,7 +78,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [frontend-build]
+          keys: [frontend-cache]
       - run:
           name: Build front-end
           command: |
@@ -94,7 +94,7 @@ jobs:
             - "frontend/node_modules"
       - save_cache:
           paths: [frontend/node_modules]
-          key: frontend-build
+          key: frontend-cache
 
   build-backend:
     docker:
@@ -102,7 +102,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build]
+          keys: [backend-cache]
       - run:
           name: Back-end build
           command: |
@@ -118,7 +118,7 @@ jobs:
             - "backend/node_modules"
       - save_cache:
           paths: [backend/node_modules]
-          key: backend-build
+          key: backend-cache
 
   test-frontend:
     docker:
@@ -126,7 +126,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [frontend-build]
+          keys: [frontend-cache]
       - run:
           name: Frontend Test
           command: |
@@ -142,7 +142,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build]
+          keys: [backend-cache]
       - run:
           name: Back-end Test
           command: |
@@ -158,7 +158,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [frontend-build]
+          keys: [frontend-cache]
       - run:
           name: Frontend Scan
           command: |
@@ -177,7 +177,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build]
+          keys: [backend-cache]
       - run:
           name: Back-end Scan
           command: |
@@ -283,7 +283,7 @@ jobs:
           aws-secret-access-key: AWS_ACCESS_SECRET
           aws-region: AWS_REGION_NAME     
       - restore_cache:
-          keys: [backend-build]
+          keys: [backend-cache]
       - run:
           name: Run migrations
           command: |
@@ -316,7 +316,7 @@ jobs:
               cd frontend
               npm install
       - restore_cache:
-          keys: [frontend-build]
+          keys: [frontend-cache]
       - run:
           name: Get backend URL
           command: |
@@ -362,7 +362,7 @@ jobs:
       - attach_workspace:
           at: ./
       - restore_cache:
-          keys: [backend-build]
+          keys: [backend-cache]
       - run:
           name: Install dependencies
           working_directory: /tmp
