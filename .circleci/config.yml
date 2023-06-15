@@ -222,8 +222,7 @@ jobs:
           aws-secret-access-key: AWS_ACCESS_SECRET
           aws-region: AWS_REGION_NAME
       - add_ssh_keys:
-          fingerprints:
-          - "c0:4f:fe:a0:f9:25:b6:ae:6f:b1:62:66:12:2e:80:2d"
+          fingerprints: ["c0:4f:fe:a0:f9:25:b6:ae:6f:b1:62:66:12:2e:80:2d"]
       - run:
           name: Install dependencies
           command: |
@@ -346,8 +345,7 @@ jobs:
           aws-secret-access-key: AWS_ACCESS_SECRET
           aws-region: AWS_REGION_NAME    
       - add_ssh_keys:
-          fingerprints:
-          - "c0:4f:fe:a0:f9:25:b6:ae:6f:b1:62:66:12:2e:80:2d"
+          fingerprints: ["c0:4f:fe:a0:f9:25:b6:ae:6f:b1:62:66:12:2e:80:2d"]          
       - attach_workspace:
           at: ./
       - restore_cache:
@@ -493,8 +491,7 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints:
-            - "c0:4f:fe:a0:f9:25:b6:ae:6f:b1:62:66:12:2e:80:2d"
+          fingerprints: ["c0:4f:fe:a0:f9:25:b6:ae:6f:b1:62:66:12:2e:80:2d"]
       - run:
           name: Install dependencies
           command: |
