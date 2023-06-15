@@ -73,15 +73,12 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - exports
       - restore_cache:
           keys: [frontend-cache]
       - run:
           name: Build front-end
           working_directory: ./frontend
           command: | 
-            echo $CURRENT_COMMIT
-            echo $PRJ_NAME
             npm install
             npm run build
       - persist_to_workspace:
