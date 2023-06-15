@@ -12,11 +12,7 @@ commands:
       id:
         type: string
         default: "${CIRCLE_WORKFLOW_ID:0:7}"
-    steps:
-      - aws-cli/setup:
-          aws-access-key-id: AWS_ACCESS_KEY
-          aws-secret-access-key: AWS_ACCESS_SECRET
-          aws-region: AWS_REGION_NAME
+    steps:      
       - run:
           name: Destroy Cloud Formation Frontend Stacks and infrastructure
           when: on_fail
@@ -385,6 +381,10 @@ jobs:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_ACCESS_SECRET
+          aws-region: AWS_REGION_NAME
       - run:
           name: Install dependencies
           command: |
@@ -423,6 +423,10 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_ACCESS_SECRET
+          aws-region: AWS_REGION_NAME
       - run:
           name: Get old workflow to update
           command: |
@@ -449,6 +453,10 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_ACCESS_SECRET
+          aws-region: AWS_REGION_NAME
       - run:
           name: Remove old stacks and files
           command: |
