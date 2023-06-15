@@ -213,9 +213,8 @@ jobs:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   configure-infrastructure:
-    executor:
-      name: python/default
-      tag: "3.11.2"
+    docker:
+        - image: cimg/base:stable
     steps:
       - checkout
       - aws-cli/setup:
@@ -224,14 +223,13 @@ jobs:
           aws-region: AWS_REGION_NAME
       - add_ssh_keys:
           fingerprints: ["dd:08:9e:3b:ba:06:c8:14:98:47:4d:f1:78:25:6f:af"]
-      - python/install-packages:
-          args: ansible
       - run:
-          name: Install dependencies
+          name: Install Ansible
           command: |
-            # install the dependencies needed for your playbook
-            # apk add --update ansible
-            echo "TEST"
+            sudo apt update
+            sudo apt install software-properties-common -y
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
       - attach_workspace:
           at: ~/
       - run:
