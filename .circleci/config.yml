@@ -229,6 +229,7 @@ jobs:
           command: |
             # install the dependencies needed for your playbook
             # apk add --update ansible
+            echo "TEST"
       - attach_workspace:
           at: ~/
       - run:
