@@ -85,9 +85,6 @@ jobs:
             cd frontend
             npm install
             npm run build
-            echo "Check current folder"
-            pwd
-            ls -l
       - persist_to_workspace:
           root: /home/circleci/project
           paths:
@@ -109,9 +106,6 @@ jobs:
             cd backend
             npm install
             npm run build
-            echo "Check current folder"
-            pwd
-            ls -l
       - persist_to_workspace:
           root: /home/circleci/project
           paths:
@@ -131,9 +125,6 @@ jobs:
           name: Frontend Test
           command: |
             cd frontend
-            echo "Check current folder"
-            pwd
-            ls -l
             npm run test
 
   test-backend:
@@ -147,9 +138,6 @@ jobs:
           name: Back-end Test
           command: |
             cd backend
-            echo "Check current folder"
-            pwd
-            ls -l
             npm run test
 
   scan-frontend:
@@ -288,9 +276,6 @@ jobs:
           name: Run migrations
           command: |
             cd backend
-            echo "Check current folder"
-            pwd
-            ls -l
             echo "Running migrations"
             npm run migrations > migrations_dump.txt
       - run:
