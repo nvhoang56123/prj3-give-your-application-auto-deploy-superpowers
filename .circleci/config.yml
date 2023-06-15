@@ -167,14 +167,11 @@ jobs:
             npm audit --audit-level=critical
   deploy-infrastructure:
     docker:
-      - image: amazon/aws-cli
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - exports
       - install_awscli
-      - run:
-          name: Install Dependencies
-          command: yum install -y tar gzip
       - run:
           name: Ensure back-end infrastructure exists
           command: |
