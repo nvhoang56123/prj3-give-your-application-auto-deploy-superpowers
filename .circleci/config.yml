@@ -465,12 +465,12 @@ jobs:
             CurrentWorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
             echo CurrentWorkflowID: "${CurrentWorkflowID}"
 
-            if [[ "$CurrentWorkflowID" != "$OldWorkflowID" -a ! -z "$OldWorkflowID" ]]
+            if [[ ( "$CurrentWorkflowID" != "$OldWorkflowID" ) && ( ! -z "$OldWorkflowID" ) ]]
             then
               echo "$OldWorkflowID!=$CurrentWorkflowID => will delete old version"
-              aws s3 rm s3://prj3-hnguyen3-udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive           
-              aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} --output text
-              aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} --output text
+              aws s3 rm s3://prj3-hnguyen3-udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive | exit 0          
+              aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} --output text | exit 0
+              aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} --output text | exit 0
             else
               echo "$OldWorkflowID==$CurrentWorkflowID => nothing needs to be done..."
             fi
