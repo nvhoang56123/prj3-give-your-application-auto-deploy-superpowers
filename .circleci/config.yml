@@ -465,7 +465,7 @@ jobs:
             CurrentWorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
             echo CurrentWorkflowID: "${CurrentWorkflowID}"
 
-            if [[ "$CurrentWorkflowID" != "$OldWorkflowID" ] && [ ! -z "$OldWorkflowID" ]]
+            if [[ "$CurrentWorkflowID" != "$OldWorkflowID" -a ! -z "$OldWorkflowID" ]]
             then
               echo "$OldWorkflowID!=$CurrentWorkflowID => will delete old version"
               aws s3 rm s3://prj3-hnguyen3-udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive           
@@ -513,8 +513,14 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-frontend
-      - build-backend
+      - build-frontend:        
+          filters:
+            branches:
+              only: [master]
+      - build-backend:        
+          filters:
+            branches:
+              only: [master]
       - test-frontend:
           requires: [build-frontend]
       - test-backend:
@@ -541,4 +547,7 @@ workflows:
       - cloudfront-update:
           requires: [smoke-test]
       - cleanup:
-          requires: [cloudfront-update]
+          #requires: [cloudfront-update]
+          filters:
+            branches:
+              only: [main]
