@@ -202,13 +202,13 @@ jobs:
                --filters "Name=tag:Name,Values=prj3-hnguyen3-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
                --query 'Reservations[*].Instances[*].PublicIpAddress' \
                --output text)
-            echo $BACKEND_PUBLIC_IP >> .circleci/ansible/inventory.ini
+            echo $BACKEND_PUBLIC_IP >> .circleci/ansible/inventory.txt
             curl --insecure https://kvdb.io/4NN3FNBordvxbbffqwaTSF/backendurl -d $(echo $BACKEND_PUBLIC_IP)
-            cat .circleci/ansible/inventory.ini
+            cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
-            - project/.circleci/ansible/inventory.ini
+            - project/.circleci/ansible/inventory.txt
       - destroy-environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -249,8 +249,8 @@ jobs:
           name: Configure server
           working_directory: ./.circleci/ansible
           command: |
-            cat inventory.ini
-            ansible-playbook -i inventory.ini configure-server.yml -vv
+            cat inventory.txt
+            ansible-playbook -i inventory.txt configure-server.yml -vv
       - persist_to_workspace:
           root: ~/
           paths:
@@ -368,19 +368,19 @@ jobs:
                --filters "Name=tag:Name,Values=prj3-hnguyen3-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
                --query 'Reservations[*].Instances[*].PublicIpAddress' \
                --output text)
-            echo $BACKEND_PUBLIC_IP >> .circleci/ansible/inventory.ini
-            cat .circleci/ansible/inventory.ini
+            echo $BACKEND_PUBLIC_IP >> .circleci/ansible/inventory.txt
+            cat .circleci/ansible/inventory.txt
             cd backend
             npm install
             npm run build
             cd ..
             export ANSIBLE_HOST_KEY_CHECKING=False
 
-            echo "*********.circleci/ansible/inventory.ini**********"
-            cat .circleci/ansible/inventory.ini
+            echo "*********.circleci/ansible/inventory.txt**********"
+            cat .circleci/ansible/inventory.txt
             echo "*********.circleci/ansible/deploy-backend.yml**********"
             cat .circleci/ansible/deploy-backend.yml
-            ansible-playbook -i .circleci/ansible/inventory.ini .circleci/ansible/deploy-backend.yml -vvv           
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml -vvv           
 
   smoke-test:
     docker:
@@ -506,7 +506,7 @@ jobs:
           command: |
             cd .circleci/ansible
             cat inventory.txt
-            ansible-playbook -i inventory.ini node-exporter.yml
+            ansible-playbook -i inventory.txt node-exporter.yml
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
