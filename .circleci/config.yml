@@ -213,8 +213,9 @@ jobs:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   configure-infrastructure:
-    docker:
-      - image: python:3.7-alpine3.11
+    executor:
+      name: python/default
+      tag: "3.11.2"
     steps:
       - checkout
       - aws-cli/setup:
@@ -227,7 +228,7 @@ jobs:
           name: Install dependencies
           command: |
             # install the dependencies needed for your playbook
-            apk add --update ansible
+            # apk add --update ansible
       - attach_workspace:
           at: ~/
       - run:
@@ -249,7 +250,7 @@ jobs:
           working_directory: ./.circleci/ansible
           command: |
             cat inventory.txt
-            ansible-playbook -i inventory.txt -vvv configure-server.yml
+            ansible-playbook -i inventory.txt -vvvvv configure-server.yml
       - persist_to_workspace:
           root: ~/
           paths:
