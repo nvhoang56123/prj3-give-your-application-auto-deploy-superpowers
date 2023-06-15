@@ -443,8 +443,7 @@ jobs:
             if [ ! -z "$OldWorkflowID" ]
               then
                 curl --insecure https://kvdb.io/4NN3FNBordvxbbffqwaTSF/OldWorkflowID -d ${OldWorkflowID}
-            fi
-            
+            fi          
       - run:
           name: Update Cloud Front distribution
           command: |
