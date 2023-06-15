@@ -48,8 +48,3 @@ Outputs:
             Name:
                 Fn::Sub: "${ID}-backend-${COMMITID}-public-dns"
                 #Fn::Sub: "backend-${COMMITID}"
-    WorkflowID:
-        Description: "Export WorkflowID for promotion"
-        Value: "${COMMITID}"
-        Export:
-            Name: "WorkflowID"                
