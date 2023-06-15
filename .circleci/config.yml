@@ -375,7 +375,12 @@ jobs:
             npm run build
             cd ..
             export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i .circleci/ansible/inventory.ini .circleci/ansible/deploy-backend.yml -vvv
+
+            echo "*********.circleci/ansible/inventory.ini**********"
+            cat .circleci/ansible/inventory.ini
+            echo "*********.circleci/ansible/deploy-backend.yml**********"
+            cat .circleci/ansible/deploy-backend.yml
+            ansible-playbook -i .circleci/ansible/inventory.ini .circleci/ansible/deploy-backend.yml -vvv           
 
   smoke-test:
     docker:
@@ -397,7 +402,7 @@ jobs:
             export BACKEND_URL=$(curl --insecure https://kvdb.io/4NN3FNBordvxbbffqwaTSF/backendurl)
             echo $BACKEND_URL
             test_result = $(curl --url "http://$BACKEND_URL:3030/api/status" --verbose --fail --retry 360 --retry-max-time 1800 --retry-all-errors)
-            if echo $test_result | grep "Welcome" > /dev/null
+            if echo $test_result | grep "ok" > /dev/null
             then
               return 0
             else
