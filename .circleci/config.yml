@@ -440,7 +440,7 @@ jobs:
             list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
             --no-paginate --output text)
             echo $OldWorkflowID
-            if [ ! -z "$var" ]
+            if [ ! -z "$OldWorkflowID" ]
               then
                 curl --insecure https://kvdb.io/4NN3FNBordvxbbffqwaTSF/OldWorkflowID -d ${OldWorkflowID}
             fi
