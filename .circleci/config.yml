@@ -343,7 +343,7 @@ jobs:
           name: Deploy backend
           working_directory: ./
           command: |
-             export BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
+            export BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
                --filters "Name=tag:Name,Values=${PRJ_NAME}-backend-${CURRENT_COMMIT}" \
                --query 'Reservations[*].Instances[*].PublicIpAddress' \
                --output text)
