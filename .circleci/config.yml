@@ -11,10 +11,8 @@ commands:
       - run:
           name: "Set some pre-define parameters"
           command: |            
-            CURRENT_COMMIT=`git rev-parse --short HEAD`
-            echo $CURRENT_COMMIT >> "$BASH_ENV"
-            export PRJ_NAME="prj3-hnguyen3" >> "$BASH_ENV"
-            echo $PRJ_NAME >> "$BASH_ENV"
+            echo 'export CURRENT_COMMIT=`git rev-parse --short HEAD`' >> "$BASH_ENV"
+            echo 'export PRJ_NAME="prj3-hnguyen3"' >> "$BASH_ENV"
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given an ID.
     parameters:
