@@ -314,7 +314,7 @@ jobs:
             aws s3 cp dist s3://${PRJ_NAME}-bucket-${CURRENT_COMMIT} --recursive --acl bucket-owner-full-control
   deploy-backend:
     docker:
-      - image: cimg/node:13.8.0
+      - image: cimg/python:3.11.4-node
         environment:
           NODE_ENV: "local"
           VERSION: "1"
@@ -330,7 +330,6 @@ jobs:
       - checkout
       - exports
       - install_awscli  
-      - install_ansible
       - add_ssh_keys:
           fingerprints: ["dd:08:9e:3b:ba:06:c8:14:98:47:4d:f1:78:25:6f:af"]          
       - attach_workspace:
@@ -338,10 +337,16 @@ jobs:
       - restore_cache:
           keys: [backend-cache]
       - run:
+          name: Install dependencies
+          working_directory: /tmp
+          command: |
+            apk add --update ansible curl rsync openssh nodejs npm tree
+            ansible --version
+      - run:
           name: Deploy backend
           working_directory: ./
           command: |
-            export BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
+            BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
                --filters "Name=tag:Name,Values=${PRJ_NAME}-backend-${CURRENT_COMMIT}" \
                --query 'Reservations[*].Instances[*].PublicIpAddress' \
                --output text)
