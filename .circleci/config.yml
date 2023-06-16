@@ -26,14 +26,17 @@ commands:
           when: on_fail
           command: |
             echo "Deleting Cloud Formation Frontend Stack" 
-            aws s3 rm s3://${PRJ_NAME}-bucket-<< parameters.id >> --recursive           
-            aws cloudformation delete-stack --stack-name ${PRJ_NAME}-frontend-<< parameters.id >> --output text
+            BUCKET_EXISTS=$(aws s3api head-bucket --bucket prj3-hnguyen3-bucket-<< parameters.id >> 2>&1 || true)
+            if [ -z "$BUCKET_EXISTS" ]; then
+              aws s3 rm s3://prj3-hnguyen3-bucket-<< parameters.id >> --recursive    
+            fi               
+            aws cloudformation delete-stack --stack-name prj3-hnguyen3-frontend-<< parameters.id >> --output text
       - run:
           name: Destroy Cloud Formation Backend Stacks and infrastructure
           when: on_fail
           command: |
             echo "Deleting Cloud Formation Backend Stack"
-            aws cloudformation delete-stack --stack-name ${PRJ_NAME}-backend-<< parameters.id >> --output text
+            aws cloudformation delete-stack --stack-name prj3-hnguyen3-backend-<< parameters.id >> --output text
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow or failed in migration step.
     parameters:
@@ -385,7 +388,7 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-            URL="${PRJ_NAME}-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com"
+            URL="${PRJ_NAME}-bucket-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com"
             echo $URL
             if curl -s http://${URL} | grep "Welcome"
             then
