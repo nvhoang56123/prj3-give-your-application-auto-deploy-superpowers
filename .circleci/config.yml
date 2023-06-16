@@ -184,22 +184,22 @@ jobs:
             aws sts get-caller-identity
             aws cloudformation deploy --template-file .circleci/files/backend.yml \
               --tags project="${PRJ_NAME}" \
-              --stack-name "${PRJ_NAME}-backend-${CURRENT_COMMIT}" \
-              --parameter-overrides COMMITID="${CURRENT_COMMIT}" ID="${PRJ_NAME}"
+              --stack-name "${PRJ_NAME}-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides COMMITID="${CIRCLE_WORKFLOW_ID:0:7}" ID="${PRJ_NAME}"
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws sts get-caller-identity
             aws cloudformation deploy --template-file .circleci/files/frontend.yml \
               --tags project="${PRJ_NAME}" \
-              --stack-name "${PRJ_NAME}-frontend-${CURRENT_COMMIT}" \
-              --parameter-overrides COMMITID="${CURRENT_COMMIT}" ID="${PRJ_NAME}"
+              --stack-name "${PRJ_NAME}-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides COMMITID="${CIRCLE_WORKFLOW_ID:0:7}" ID="${PRJ_NAME}"
       - run:
           name: Add back-end ip to ansible inventory
           command: |
             echo $(aws ec2 describe-instances)
             BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
-               --filters "Name=tag:Name,Values=${PRJ_NAME}-backend-${CURRENT_COMMIT}" \
+               --filters "Name=tag:Name,Values=${PRJ_NAME}-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
                --query 'Reservations[*].Instances[*].PublicIpAddress' \
                --output text)
             echo $BACKEND_PUBLIC_IP >> .circleci/ansible/inventory.txt
@@ -210,7 +210,7 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment:
-          id: ${CURRENT_COMMIT}
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   configure-infrastructure:
     docker:
@@ -248,7 +248,7 @@ jobs:
           paths:
             - project/backend
       - destroy-environment:
-          id: ${CURRENT_COMMIT}
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   run-migrations:
     docker:
@@ -271,10 +271,10 @@ jobs:
             if grep -q "success" ~/project/backend/migrations_dump.txt
             then
               # If you are using kvdb.io, generate the bucket ID "4NN3FNBordvxbbffqwaTSF" in your local terminal first
-              curl --insecure https://kvdb.io/4NN3FNBordvxbbffqwaTSF/migration_${CURRENT_COMMIT}  -d '1'
+              curl --insecure https://kvdb.io/4NN3FNBordvxbbffqwaTSF/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
       - destroy-environment:
-          id: ${CURRENT_COMMIT}
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-frontend:
     docker:
@@ -295,7 +295,7 @@ jobs:
           working_directory: ./frontend
           command: |   
             export BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
-               --filters "Name=tag:Name,Values=${PRJ_NAME}-backend-${CURRENT_COMMIT}" \
+               --filters "Name=tag:Name,Values=${PRJ_NAME}-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
                --query 'Reservations[*].Instances[*].PublicIpAddress' \
                --output text)
             export API_URL="http://${BACKEND_PUBLIC_IP}:3030"
@@ -310,11 +310,11 @@ jobs:
             npm install
             npm run build
             cp .env dist
-            tar -czvf artifact-"${CURRENT_COMMIT}".tar.gz dist
-            aws s3 cp dist s3://${PRJ_NAME}-bucket-${CURRENT_COMMIT} --recursive --acl bucket-owner-full-control
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://${PRJ_NAME}-bucket-${CIRCLE_WORKFLOW_ID:0:7} --recursive --acl bucket-owner-full-control
   deploy-backend:
     docker:
-      - image: cimg/base:stable
+      - image: python:3.7-alpine3.11
         environment:
           NODE_ENV: "local"
           VERSION: "1"
@@ -338,11 +338,17 @@ jobs:
       - restore_cache:
           keys: [backend-cache]
       - run:
+          name: Install dependencies
+          working_directory: /tmp
+          command: |
+            apk add --update ansible curl rsync openssh nodejs npm tree
+            ansible --version
+      - run:
           name: Deploy backend
           working_directory: ./
           command: |
             export BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
-               --filters "Name=tag:Name,Values=${PRJ_NAME}-backend-${CURRENT_COMMIT}" \
+               --filters "Name=tag:Name,Values=prj3-hnguyen3-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
                --query 'Reservations[*].Instances[*].PublicIpAddress' \
                --output text)
             echo $BACKEND_PUBLIC_IP >> .circleci/ansible/inventory.txt
@@ -352,7 +358,8 @@ jobs:
             npm run build
             cd ..
             export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml -vvv          
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml -vvv
+  
   smoke-test:
     docker:
       - image: python:3.7-alpine3.11
@@ -388,9 +395,9 @@ jobs:
               return 1
             fi
       - destroy-environment:
-          id: ${CURRENT_COMMIT}
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
-          id: ${CURRENT_COMMIT}
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   cloudfront-update:
     docker:
@@ -406,11 +413,11 @@ jobs:
               --template-file .circleci/files/cloudfront.yml \
               --tags project=${PRJ_NAME} \
               --stack-name "${PRJ_NAME}-CloudFront" \
-              --parameter-overrides WorkflowID="${CURRENT_COMMIT}"
+              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
       - revert-migrations:
-          id: ${CURRENT_COMMIT}
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
       - destroy-environment:
-          id: ${CURRENT_COMMIT}
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   cleanup:
     docker:
@@ -425,7 +432,7 @@ jobs:
             # Fetch the Old workflow ID
             export OldWorkflowID=$(curl --insecure https://kvdb.io/FWfT3EJvSc3D57Yhp76CdN/OldWorkflowID)
             echo OldWorkflowID: "${OldWorkflowID}"
-            echo CIRCLE_WORKFLOW_ID "${CURRENT_COMMIT}"
+            echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
             CurrentWorkflowID=${CCURRENT_COMMIT}
             echo CurrentWorkflowID: "${CurrentWorkflowID}"
 

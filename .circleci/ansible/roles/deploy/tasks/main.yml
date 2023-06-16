@@ -6,7 +6,7 @@
       name:
         - openssh
         - rsync
-      state: absent
+      state: present
 
   - name: "move files to server"
     become: yes
