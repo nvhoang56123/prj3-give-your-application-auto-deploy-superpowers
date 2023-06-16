@@ -292,8 +292,7 @@ jobs:
           working_directory: ./frontend
           command: |   
             echo ${PRJ_NAME}
-            echo ${CURRENT_COMMIT}
-            cat .circleci/ansible/inventory.txt         
+            echo ${CURRENT_COMMIT}    
             export BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
                --filters "Name=tag:Name,Values=${PRJ_NAME}-backend-${CURRENT_COMMIT}" \
                --query 'Reservations[*].Instances[*].PublicIpAddress' \
