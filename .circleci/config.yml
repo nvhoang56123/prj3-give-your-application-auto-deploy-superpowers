@@ -339,13 +339,11 @@ jobs:
           command: |
             apk add --update ansible curl rsync openssh nodejs npm tree
             ansible --version
-            pip install awscli
-            aws --version
       - run:
           name: Deploy backend
           working_directory: ./
           command: |
-            BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
+             export BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
                --filters "Name=tag:Name,Values=${PRJ_NAME}-backend-${CURRENT_COMMIT}" \
                --query 'Reservations[*].Instances[*].PublicIpAddress' \
                --output text)
@@ -356,8 +354,7 @@ jobs:
             npm run build
             cd ..
             export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml -vvv           
-
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml -vvv          
   smoke-test:
     docker:
       - image: python:3.7-alpine3.11
@@ -369,7 +366,6 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update curl
-            pip install awscli
       - run:
           name: Backend smoke test.
           command: |
